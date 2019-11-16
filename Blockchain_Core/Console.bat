@@ -1,0 +1,1 @@
+geth --identity "node0" --gcmode archive --rpc --rpcport "8545" --rpccorsdomain "*" --datadir data --port "30303" --nodiscover --rpcapi "db,eth,miner,net,web3,personal,web3" --networkid 1999 console
