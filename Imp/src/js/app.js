@@ -34,7 +34,7 @@ App = {
   },
 
   initContract: function() {
-    $.getJSON('GlobalContact.json', function(data) {
+    $.getJSON('./Imp/build/contracts/GlobalContact.json', function(data) {
       // Get the necessary contract artifact file and instantiate it with truffle-contract
       var globalContactData = data;
       App.contracts.globalContact = TruffleContract(globalContactData);
