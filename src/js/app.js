@@ -1,99 +1,275 @@
-App = {
-    web3Provider: null,
-    contracts: {},
-  
-    init: async function() {
-      return await App.initWeb3();
-    },
-  
-    initWeb3: async function() {
-      // Modern dapp browsers...
-      if (window.ethereum) {
-        App.web3Provider = window.ethereum;
-        try {
-          // Request account access
-          await window.ethereum.enable();
-        } catch (error) {
-          // User denied account access...
-          console.error("User denied account access")
+const Web3 = require('web3');
+var web3 = new Web3();
+
+const mIdNumber = 201690345;
+var contracts = {};
+var tmpAddress = "";
+var selectedContract;
+
+function initWeb3(){
+    web3.setProvider(new web3.providers.HttpProvider('http://localhost:8545'));
+
+    return initContract();
+}
+
+function initContract() {
+    $.getJSON('js/json/Common.json', function(data) {
+      contracts.globalContact = {};
+      contracts.globalContact.address = data.globalContact.address;
+      contracts.globalContact.abi = data.globalContact.abi;
+
+      var ABI = web3.eth.contract(contracts.globalContact.abi);
+      contracts.globalContact.instance = ABI.at(contracts.globalContact.address);
+    });
+
+    $.getJSON('js/json/Common.json', function(data) {
+      contracts.deploySCContract = {};
+      contracts.deploySCContract.address = data.deploySCContract.address;
+      contracts.deploySCContract.abi = data.deploySCContract.abi;
+
+      var ABI = web3.eth.contract(contracts.deploySCContract.abi);
+      contracts.deploySCContract.instance = ABI.at(contracts.deploySCContract.address);
+    });
+
+    $.getJSON('js/json/Common.json', function(data) {
+      contracts.summaryContract = {};
+      contracts.summaryContract.address = "";
+      contracts.summaryContract.abi = data.summaryContract.abi;
+    });
+
+    $.getJSON('js/json/Common.json', function(data) {
+      contracts.tradingContract = {};
+      contracts.tradingContract.address = "";
+      contracts.tradingContract.abi = data.tradingContract.abi;
+    });
+}
+
+// Create new user account
+function createNewUser(inUserName, inIDnumber, inUserAddr, inType, inPassword){
+  try{
+    if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+      var hash =  contracts.deploySCContract.instance.deploy(inUserAddr, {from: web3.eth.coinbase, gas: 2100000});
+      while(true){
+        if(web3.eth.getTransactionReceipt(hash) != null){
+          tmpAddress = contracts.deploySCContract.instance.getAddress();
+          alert("Transaction successfully with result:\n" + tmpAddress);
+          break;
         }
       }
-      // Legacy dapp browsers...
-      else if (window.web3) {
-        App.web3Provider = window.web3.currentProvider;
-      }
-      // If no injected web3 instance is detected, fall back to Ganache
-      else {
-        App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
-      }
-      web3 = new Web3(App.web3Provider);
+    }
+    if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+      var hash = contracts.globalContact.instance.newRegistor.sendTransaction(inUserName, inIDnumber, inUserAddr, tmpAddress, inType, {from: web3.eth.coinbase, gas: 250000})
+      console.log(hash);
+    }
+  } catch {
+    throw "Unknown error!";
+  }
+}
   
-      //document.getElementById("balance").innerHTML = web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toFixed(2);
-  
-      return App.initContract();
-    },
-  
-    initContract: function() {
-      $.getJSON('js/json/GlobalContact.json', function(data) {
-        // Get the necessary contract artifact file and instantiate it with truffle-contract
-        var globalContactData = data;
-        App.contracts.globalContact = TruffleContract(globalContactData);
-        App.contracts.globalContact.setProvider(App.web3Provider);
-      });
-  
-      //return App.bindEvents();
-    },
-  
-    createNewUser: function(inName, inIDnumber, inAccAddr, inType, inPassword){
-      var globalContractInstance;
-      web3.eth.getAccounts(function(error, accounts) {
-        if (error) {
-          console.log(error);
-        }
-        var account = accounts[0];
-  
-        App.contracts.globalContact.deployed().then(function(instance){
-          globalContractInstance = instance;
-          if(web3.personal.unlockAccount(account, inPassword)){
-            globalContractInstance.newRegistor(inName, inIDnumber, inAccAddr, inType, {from: account});
+// Get user information
+function getUserInfo(inData){
+  var type = typeof inData;
+  var ret = null;
+  if(type == "number"){
+      ret = contracts.globalContact.instance.getUserInfoByID(inData);
+  } else if(type == "string"){
+      ret = contracts.globalContact.instance.getUserInfoByAddr(inData);
+  }
+  return ret;
+}
+
+// Create new contract
+function createNewContract(inSellerAddr, inContractName, inPassword){
+  try{
+    // Get current account sc address
+    var address = getUserInfo(web3.eth.coinbase)[2];
+    // Create sc instance
+    var ABI = web3.eth.contract(contracts.summaryContract.abi);
+    var instance = ABI.at(address);
+    const prevContractNum = instance.getMainContractLen();
+
+    if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+        var hash = instance.createNewContract.sendTransaction(inSellerAddr, inContractName, {from: web3.eth.coinbase, gas: 1700000})
+        console.log(hash);
+        while(true){
+          if(web3.eth.getTransactionReceipt(hash) != null){
+              break;
           }
-        }).then(function(result){
-          console.log("Success!");
-        }).catch(function(err){
-          console.log(err.message);
-        });
-      });
-    },
+        }
+        if(instance.getMainContractLen() == prevContractNum+1){
+          alert("Successfully created new contract!")
+        }
+    } else {
+        throw "Incorrect password!";
+    }
+
+    // Get contract address
+    var contractAddr = instance.getContractInfoAtIndex(instance.getMainContractLen()-1)[1];
+    // Get seller summary contract
+    instance = ABI.at(contracts.globalContact.instance.getUserInfoByAddr(inSellerAddr)[2]);
+    if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+        hash = instance.addTempContract(contractAddr, inContractName, {from: web3.eth.coinbase, gas: 500000});
+        console.log(hash);
+    } else {
+        throw "Incorrect password!";
+    }
+  } catch {
+    throw "Unknown error";
+  }
+}
+
+// Get waiting for process contract length
+function getTempContractLen(){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  return instance.getTempContractLen();
+}
+
+// Get waiting for process contract information at index
+function getTempContractAtIndex(inIndex){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  return instance.getTempContractAtIndex(inIndex);
+}
+
+// Delete temporary contract at index
+function delTempContractAtIndex(inIndex, inPassword){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  const prevContractNum = instance.getTempContractLen();
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+      var hash = instance.delTempContractAtIndex(inIndex, {from: web3.eth.coinbase, gas: 200000});
+      console.log(hash);
+      while(true){
+        if(web3.eth.getTransactionReceipt(hash) != null){
+            if(instalce.getTempContractLen() == prevContractNum-1){
+              alert("Successfully remove temporary contract at " + inIndex);
+            }
+            break;
+        }
+      }
+  } else {
+      throw "Incorrect password!";
+  }
+}
+
+// Add temporary contract to main contract list
+function addTempContract2List(inIndex, inPassword){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  var prevTempNum = instance.getTempContractLen();
+  var prevMainNum = instance.getMainContractLen();
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = instance.addTempContract2List(inIndex, {from: web3.eth.coinbase, gas: 300000});
+    console.log(hash);
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        if(instance.getTempContractLen() == prevTempNum-1 && instance.getMainContractLen() == prevMainNum+1){
+          alert("Successfully add temporary contract to list");
+        }
+        break;
+      }
+    }
+  } else {
+      throw "Incorrect password!";
+  }
+}
+
+// Get main contract information at index
+function getContractInfoAtIndex(inIndex){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  return instance.getContractInfoAtIndex(inIndex);
+}
+
+// Get main contract length
+function getMainContractLen(){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  return instance.getMainContractLen();
+}
+
+// Disable contract at index
+function disableContractAtIndex(inIndex, inPassword){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = instance.disableContractAtIndex(inIndex, {from: web3.eth.coinbase, gas: 200000});
+    console.log(hash);
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        if(instance.getContractInfoAtIndex(inIndex)[3] == 0){
+          alert("Successfully disable contract!");
+        }
+        break;
+      }
+    }
+  } else {
+      throw "Incorrect password!";
+  }
+}
+
+// Select contract in list
+function selectContractAtIndex(inIndex){
+  // Create sc instance
+  var ABI = web3.eth.contract(contracts.summaryContract.abi);
+  var instance = ABI.at(getUserInfo(web3.eth.coinbase)[2]);
+  ABI = web3.eth.contract(contracts.tradingContract.abi);
+  selectedContract = ABI.at(instance.getContractInfoAtIndex(inIndex)[2]);
+}
+
+function sendConfirmation(inConfirm, inPassword){
+
+}
+
+function updateOption(){
+
+}
+
+function getOption(){
+
+}
+
+function updateFixedPrice(){
+
+}
+
+function getFixedPrice(){
+
+}
+
+function updateReceipt(){
+
+}
+
+function updateBuyerDocument(){
+
+}
+
+function updateSellerDocument(){
+
+}
+
+function getDocumentInfo(){
+
+}
+
+function getConfirmationStatus(){
   
-    getUserNameByID: function(inIDnumber){
-      var globalContractInstance;
-  
-      App.contracts.globalContact.deployed().then(function(instance){
-        globalContractInstance = instance;
-        return globalContractInstance.getUserNameByID(inIDnumber);
-      }).then(function(result){
-        console.log("Success!");
-      }).catch(function(err){
-        console.log(err.message);
-      });
-    },
-  
-    // markAdopted: function(adopters, account) {
-    //   /*
-    //    * Replace me...
-    //    */
-    // },
-  
-    // handleAdopt: function(event) {
-    //   event.preventDefault();
-  
-    //   var petId = parseInt($(event.target).data('id'));
-  
-    //   /*
-    //    * Replace me...
-    //    */
-    // }
-  
-  };
-  
-  App.init()
+}
+
+initWeb3()
+//Display user info
+var myVar = setInterval(timerHandler, 100);
+function timerHandler(){
+    // Set default account
+    document.getElementById("username").innerHTML = contracts.globalContact.instance.getUserInfoByAddr(web3.eth.coinbase)[0];
+    document.getElementById("balance").innerHTML = web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toFixed(2);
+}

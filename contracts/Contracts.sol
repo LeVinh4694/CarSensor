@@ -433,6 +433,25 @@ contract SummaryContract{
     }
 }
 
+contract DeploySCContract{
+    address public returnedAddr;
+    
+    function deploy
+            (address inOwner)
+            public
+    {
+        returnedAddr = new SummaryContract(inOwner);
+    }
+
+    function getAddress()
+            public
+            view
+            returns(address)
+    {
+        return returnedAddr;
+    }
+}
+
 contract GlobalContact{
     enum UserType
     {
@@ -464,14 +483,14 @@ contract GlobalContact{
     }
     
     function newRegistor
-            (string name, uint64 id_number, address accAddr, UserType inType) 
+            (string name, uint64 id_number, address accAddr, address scAddr, UserType inType) 
             onlyOwner 
             public
     {
         rc.name = name;
         rc.id_number = id_number;
         rc.accAddr = accAddr;
-        rc.SContract = new SummaryContract(accAddr);
+        rc.SContract = scAddr;
         rc.uType = inType;
         
         userByID[id_number] = rc;
