@@ -114,12 +114,22 @@ contract TradingContract is Common{
     }
     
     modifier restricBuyerModify{
-        require(eComfirmation[1] == eConfirmStatus.None);
+        require(eComfirmation[0] == eConfirmStatus.None);
         _;
     }
     
     modifier restricSellerModify{
-        require(eComfirmation[0] == eConfirmStatus.None);
+        require(eComfirmation[1] == eConfirmStatus.None);
+        _;
+    }
+
+    modifier restricOwnerModify{
+        require(eComfirmation[0] == eConfirmStatus.None && eComfirmation[1] == eConfirmStatus.None);
+        _;
+    }
+
+    modifier onlyContractAvailable{
+        require(eContractStatus.Rejected != eStatus);
         _;
     }
     
@@ -132,13 +142,13 @@ contract TradingContract is Common{
     }
     
     constructor
-            (address inSeller) 
+            (address inBuyer, address inSeller) 
             public
     {
-        aOwnerAddrs = [msg.sender, inSeller];
+        aOwnerAddrs = [inBuyer, inSeller];
         eStatus = eContractStatus.InProgress;
         
-        opState = eOpState.opInsuranceOption;
+        opState = eOpState.opDealling;
         
         bInsuranceOptions = [false, false, false];
         price = Price(0, 0, eDiscountType.Percent, 0, 0);
@@ -182,12 +192,12 @@ contract TradingContract is Common{
     
     function updateOption
             (bool[3] inOptions)
-            onlyInsuranceOption
+            onlyDealling
             onlyBuyer
+            restricOwnerModify
             public
     {
         bInsuranceOptions = inOptions;
-        opState = eOpState.opDealling;
     }
     
     function getOptions()
@@ -201,8 +211,8 @@ contract TradingContract is Common{
     function updateFixedPrice
             (uint32 inPrice, uint32 inDiscount, eDiscountType inType, uint32 inInsurance, uint32 inExtraFee)
             onlyDealling
-            onlySeller
-            restricBuyerModify
+            onlyOwner
+            restricOwnerModify
             public
     {
         price = Price(inPrice, inDiscount, inType, inInsurance, inExtraFee);
@@ -220,7 +230,7 @@ contract TradingContract is Common{
             (string inReceiptInfo)
             onlyTransferDocument
             onlyBuyer
-            restricBuyerModify
+            restricOwnerModify
             public
     {
         document.sReceipt = inReceiptInfo;
@@ -231,7 +241,7 @@ contract TradingContract is Common{
             (string inDoc1, string inDoc2)
             onlyTransferDocument
             onlyBuyer
-            restricBuyerModify
+            restricOwnerModify
             public
     {
         document.sDoc1 = inDoc1;
@@ -244,7 +254,7 @@ contract TradingContract is Common{
             (string inDoc3)
             onlyTransferDocument
             onlySeller
-            restricSellerModify
+            restricOwnerModify
             public
     {
         document.sDoc3 = inDoc3;
@@ -312,7 +322,7 @@ contract SummaryContract{
     {
         mCI.sName = inContractName;
         mCI.aRelatedAddr = inSeller;
-        mCI.aContractAddr = new TradingContract(inSeller);
+        mCI.aContractAddr = new TradingContract(msg.sender, inSeller);
         mCI.bStatus = uint8(ContractStt.InProgress);
 
         mMainContracts.push(mCI);

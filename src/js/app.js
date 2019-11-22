@@ -58,7 +58,7 @@ function createNewUser(inUserName, inIDnumber, inUserAddr, inType, inPassword){
       }
     }
     if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
-      var hash = contracts.globalContact.instance.newRegistor.sendTransaction(inUserName, inIDnumber, inUserAddr, tmpAddress, inType, {from: web3.eth.coinbase, gas: 250000})
+      var hash = contracts.globalContact.instance.newRegistor.sendTransaction(inUserName, inIDnumber, inUserAddr, tmpAddress, inType, {from: web3.eth.coinbase, gas: 500000})
       console.log(hash);
     }
   } catch {
@@ -225,51 +225,109 @@ function selectContractAtIndex(inIndex){
   selectedContract = ABI.at(instance.getContractInfoAtIndex(inIndex)[2]);
 }
 
+// 150000 gas
 function sendConfirmation(inConfirm, inPassword){
-
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.sendConfirmation(inConfirm, {from: web3.eth.coinbase, gas: 150000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
 }
 
-function updateOption(){
-
+// 400000 gas
+function updateOption(inOption, inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.updateOption(inOption, {from: web3.eth.coinbase, gas: 400000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null && inOption == selectedContract.getOptions()){
+        alert("Successfully update contract!");
+        break;
+      } else {
+        alert("Failed!");
+        break;
+      }
+    }
+  }
 }
 
 function getOption(){
-
+  return selectedContract.getOptions();
 }
 
-function updateFixedPrice(){
-
+// 150000 gas
+function updateFixedPrice(inPrice, inDiscount, inType, inInsurance, inExtra, inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.updateFixedPrice(inPrice, inDiscount, inType, inInsurance, inExtra, {from: web3.eth.coinbase, gas: 200000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
 }
 
 function getFixedPrice(){
-
+  return selectedContract.getFixedPrice();
 }
 
-function updateReceipt(){
-
+function updateReceipt(inReceipt, inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.updateReceipt(inReceipt, {from: web3.eth.coinbase, gas: 170000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
 }
 
-function updateBuyerDocument(){
-
+function updateBuyerDocument(inDoc1, inDoc2, inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.updateBuyerDocument(inDoc1, inDoc2, {from: web3.eth.coinbase, gas: 180000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
 }
 
-function updateSellerDocument(){
-
+function updateSellerDocument(inDoc3, inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.updateSellerDocument(inDoc3, {from: web3.eth.coinbase, gas: 170000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
 }
 
 function getDocumentInfo(){
-
+  return selectedContract.getDocumentInfo();
 }
 
 function getConfirmationStatus(){
-  
+  return selectedContract.getConfirmationStatus();
+}
+
+function getContractStatus(){
+  return selectedContract.getContractStatus();
 }
 
 initWeb3()
 //Display user info
-var myVar = setInterval(timerHandler, 100);
+//var myVar = setInterval(timerHandler, 100);
 function timerHandler(){
     // Set default account
-    document.getElementById("username").innerHTML = contracts.globalContact.instance.getUserInfoByAddr(web3.eth.coinbase)[0];
-    document.getElementById("balance").innerHTML = web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toFixed(2);
+    // document.getElementById("username").innerHTML = contracts.globalContact.instance.getUserInfoByAddr(web3.eth.coinbase)[0];
+    // document.getElementById("balance").innerHTML = web3.fromWei(web3.eth.getBalance(web3.eth.coinbase), 'ether').toFixed(2);
 }
