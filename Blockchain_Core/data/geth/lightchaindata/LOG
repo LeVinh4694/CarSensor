@@ -1,6 +1,6 @@
-=============== Nov 20, 2019 (+07) ===============
-01:34:50.733608 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-01:34:50.784509 db@open opening
-01:34:50.786504 version@stat F·[] S·0B[] Sc·[]
-01:34:50.828041 db@janitor F·2 G·0
-01:34:50.828041 db@open done T·43.5316ms
+=============== Nov 23, 2019 (+07) ===============
+09:05:17.557305 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+09:05:17.559326 db@open opening
+09:05:17.560326 version@stat F·[] S·0B[] Sc·[]
+09:05:17.561323 db@janitor F·2 G·0
+09:05:17.561323 db@open done T·1.9969ms
