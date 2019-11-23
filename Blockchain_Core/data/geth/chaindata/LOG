@@ -1,26 +1,16 @@
 =============== Nov 23, 2019 (+07) ===============
-09:05:17.524320 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-09:05:17.529325 db@open opening
-09:05:17.536360 version@stat F·[] S·0B[] Sc·[]
-09:05:17.537414 db@janitor F·2 G·0
-09:05:17.538356 db@open done T·9.0316ms
+22:33:00.450962 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+22:33:00.486503 db@open opening
+22:33:00.487500 version@stat F·[] S·0B[] Sc·[]
+22:33:00.519843 db@janitor F·2 G·0
+22:33:00.519843 db@open done T·33.3397ms
 =============== Nov 23, 2019 (+07) ===============
-09:10:11.497553 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-09:10:11.497553 version@stat F·[] S·0B[] Sc·[]
-09:10:11.497553 db@open opening
-09:10:11.497553 journal@recovery F·1
-09:10:11.501542 journal@recovery recovering @1
-09:10:11.507788 memdb@flush created L0@2 N·9 S·598B "H\x9ab..\x9ff\xf2,v3":"r\x00\x00..\x9ff\xf2,v5"
-09:10:11.509782 version@stat F·[1] S·598B[598B] Sc·[0.25]
-09:10:11.516851 db@janitor F·3 G·0
-09:10:11.516851 db@open done T·19.2986ms
-=============== Nov 23, 2019 (+07) ===============
-09:35:21.431340 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
-09:35:21.437346 version@stat F·[1] S·598B[598B] Sc·[0.25]
-09:35:21.437346 db@open opening
-09:35:21.437346 journal@recovery F·1
-09:35:21.439317 journal@recovery recovering @3
-09:35:21.444334 memdb@flush created L0@5 N·2 S·241B "Dat..ion,v11":"Las..der,v12"
-09:35:21.446299 version@stat F·[2] S·839B[839B] Sc·[0.50]
-09:35:21.453309 db@janitor F·4 G·0
-09:35:21.453309 db@open done T·15.9629ms
+22:33:03.210449 log@legend F·NumFile S·FileSize N·Entry C·BadEntry B·BadBlock Ke·KeyError D·DroppedEntry L·Level Q·SeqNum T·TimeElapsed
+22:33:03.211446 version@stat F·[] S·0B[] Sc·[]
+22:33:03.211446 db@open opening
+22:33:03.211446 journal@recovery F·1
+22:33:03.213441 journal@recovery recovering @1
+22:33:03.256131 memdb@flush created L0@2 N·9 S·598B "H\x9ab..\x9ff\xf2,v3":"r\x00\x00..\x9ff\xf2,v5"
+22:33:03.258101 version@stat F·[1] S·598B[598B] Sc·[0.25]
+22:33:03.340133 db@janitor F·3 G·0
+22:33:03.340133 db@open done T·128.6875ms

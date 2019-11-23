@@ -338,7 +338,7 @@ contract SummaryContract{
         mCI.aContractAddr = inContractAddr;
         mCI.bStatus = uint8(ContractStt.Disabled);
         
-        mWaitProcessContract.push(mCI);
+        mMainContracts.push(mCI);
     }
     
     // Get temporary contract list length
