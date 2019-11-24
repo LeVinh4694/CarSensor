@@ -89,7 +89,7 @@ function createNewContract(inSellerAddr, inContractName, inPassword){
     const prevContractNum = instance.getMainContractLen();
 
     if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
-        var hash = instance.createNewContract.sendTransaction(inSellerAddr, inContractName, {from: web3.eth.coinbase, gas: 1700000})
+        var hash = instance.createNewContract.sendTransaction(inSellerAddr, inContractName, {from: web3.eth.coinbase, gas: 1900000})
         console.log(hash);
         while(true){
           if(web3.eth.getTransactionReceipt(hash) != null){
@@ -104,7 +104,7 @@ function createNewContract(inSellerAddr, inContractName, inPassword){
     }
 
     // Get contract address
-    var contractAddr = instance.getContractInfoAtIndex(instance.getMainContractLen()-1)[1];
+    var contractAddr = instance.getContractInfoAtIndex(instance.getMainContractLen()-1)[2];
     // Get seller summary contract
     instance = ABI.at(contracts.globalContact.instance.getUserInfoByAddr(inSellerAddr)[2]);
     if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
@@ -206,7 +206,6 @@ function disableContractAtIndex(inIndex, inPassword){
     while(true){
       if(web3.eth.getTransactionReceipt(hash) != null){
         if(instance.getContractInfoAtIndex(inIndex)[3] == 0){
-          alert("Successfully disable contract!");
         }
         break;
       }
@@ -228,10 +227,31 @@ function selectContractAtIndex(inIndex){
 // 150000 gas
 function sendConfirmation(inConfirm, inPassword){
   if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
-    var hash = selectedContract.sendConfirmation(inConfirm, {from: web3.eth.coinbase, gas: 150000})
+    var hash = selectedContract.sendConfirmation(inConfirm, {from: web3.eth.coinbase, gas: 200000})
     while(true){
       if(web3.eth.getTransactionReceipt(hash) != null){
-        alert("Successfully update contract!");
+        break;
+      }
+    }
+  }
+}
+
+function nextState(inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.nextState({from: web3.eth.coinbase, gas: 200000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
+        break;
+      }
+    }
+  }
+}
+
+function rejectContract(inPassword){
+  if(web3.personal.unlockAccount(web3.eth.coinbase, inPassword)){
+    var hash = selectedContract.rejectContract({from: web3.eth.coinbase, gas: 200000})
+    while(true){
+      if(web3.eth.getTransactionReceipt(hash) != null){
         break;
       }
     }
@@ -244,10 +264,8 @@ function updateOption(inOption, inPassword){
     var hash = selectedContract.updateOption(inOption, {from: web3.eth.coinbase, gas: 400000})
     while(true){
       if(web3.eth.getTransactionReceipt(hash) != null && inOption == selectedContract.getOptions()){
-        alert("Successfully update contract!");
         break;
       } else {
-        alert("Failed!");
         break;
       }
     }
